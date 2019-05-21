@@ -1,4 +1,4 @@
-%% Demo for Image-based Navigation using Visual Features and Map (ID 4087)
+%% Demo for Mapping, Localization and Path Planning for Image-based Navigation using Visual Features and Map
 %
 % This demo does the following using the concepts introduced in our paper:
 % 1) Find landmarks in a sub sequence of the Oxford Robotcar run from  2015-10-29 12:18:17
@@ -8,8 +8,7 @@
 %
 % If you do not have mosek installed, you can have a look at the saved
 % figures in the results folder instead.
-%
-%
+
 %% CHANGE THIS TO MATCH YOUR MOSEK INSTALLATION
 dpath = javaclasspath;
 if isempty(dpath)
