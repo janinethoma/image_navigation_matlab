@@ -22,7 +22,7 @@ a_nn = 5; % Number of images in anchor nbh
 tg = 0.1; % Flow through anchor nbh
 
 %% Get costs
-feat_dists = feat_dists / median(min(feat_dists));
+feat_dists = feat_dists / median(feat_dists);
 costs = 1 ./ (1e-6 + feat_dists);
 
 %% Get anchors
