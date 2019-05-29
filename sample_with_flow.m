@@ -15,11 +15,16 @@ function [idx] = sample_with_flow(xy, edges, source_idx, sink_idx, ...
 % OUTPUT:
 % idx: node indices of selected landmarks
 
+if exist('temp_flow.mat', 'file')
+    disp('Loading flow from file. Delete temp_flow.mat, if you want to recalculate.')
+    load('temp_flow.mat')
+else
+
 
 T = 0.1; % Total flow
 a_dist = 4; % Distance between anchors
 a_nn = 5; % Number of images in anchor nbh
-tg = 0.1; % Flow through anchor nbh
+tg = 0.05; % Flow through anchor nbh
 
 %% Get costs
 feat_dists = feat_dists / median(feat_dists);
@@ -80,7 +85,7 @@ for idx = 1:n % For each node
     if ~isempty(select_j) % Edges incoming to node idx
         f_tot = Expr.sub(f_tot, Expr.sum(f.pick(select_j)));
     end
-    
+
     if isempty(union(select_i, select_j))
         continue;
     end
@@ -117,6 +122,9 @@ M.solve();
 M.dispose();
 
 flow = f.level();
+
+save('temp_flow.mat', 'flow', 'arc_i')
+end
 
 
 %% Choose nodes with highest flow

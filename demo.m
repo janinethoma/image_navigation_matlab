@@ -12,7 +12,7 @@
 %% CHANGE THIS TO MATCH YOUR MOSEK INSTALLATION
 dpath = javaclasspath;
 if isempty(dpath)
-    path = '/path/to/your/mosek/installation';
+    path = '/path/to/your/mosek/installation'; 
     system(['export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:', path, '/mosek/8/tools/platform/linux64x86/bin/libmosek64.so.8.0']);
     addpath([path, '/mosek/8/toolbox/r2014a/']);
     javaaddpath([path, '/mosek/8/tools/platform/linux64x86/bin/mosekmatlab.jar']);
@@ -43,6 +43,12 @@ saveas(f1, fullfile('results', 'original_sequences.eps'),'epsc')
 
 
 %% Generate topology
+if exist('temp_topology.mat', 'file')
+    disp('Loading topology from file. Delete temp_topology.mat, if you want to recalculate.')
+    load('temp_topology.mat')
+else
+disp('Generating topology')
+    
 [edges, geo_dists] = get_edges(ref.xy,10,2);
 source_idx = 1;
 sink_idx = length(ref.x);
@@ -64,9 +70,18 @@ ylabel('UTM Northing [m]')
 hold off;
 saveas(f2, fullfile('results', 'topology.eps'),'epsc')
 
+save('temp_topology.mat','edges','geo_dists','source_idx','sink_idx')
+end
 
 %% Sample landmarks with flow
-num_landmarks = 100;
+
+if exist('temp_lm.mat', 'file')
+    disp('Loading landmarks from file. Delete temp_lm.mat, if you want to recalculate.')
+    load('temp_lm.mat')
+else
+disp('Sampling landmarks')
+    
+num_landmarks = 150;
 
 % Get feature distance for each edge in reference topology
 feat_dists = f_dists_ref_ref(sub2ind(size(f_dists_ref_ref),...
@@ -89,9 +104,12 @@ ylabel('UTM Northing [m]')
 hold off;
 saveas(f3, fullfile('results', 'landmarks.eps'),'epsc')
 
+save('temp_lm.mat','flow_lm','uniform_lm')
+end
 
 
 %% Match with flow
+disp('Matching query sequence to landmarks')
 
 F = f_dists_query_ref;
 D = pdist2(query.xy', ref.xy');
@@ -102,14 +120,15 @@ flow_matches = match_with_flow(query.xy,ref.xy(:,flow_lm),F(:,flow_lm));
 
 % Retrieve without matching
 [~, feature_matches] = sort(F(:,uniform_lm),2);
-
+[~, lm_only_matches] = sort(F(:,flow_lm),2);
 
 %% Display accuracy
 f4 = figure; hold on;
 plotAccVsDist(D(:,uniform_lm), feature_matches(:, 1:10), [0, 0.4470, 0.7410], ':');
 plotAccVsDist(D(:,flow_lm), flow_matches, [0.4660, 0.6740, 0.1880], '-');
+plotAccVsDist(D(:,flow_lm), lm_only_matches(:, 1:1), [0, 0, 0], ':');
 plotAccVsDist(D(:,uniform_lm), feature_matches(:, 1:1), [0.8500, 0.3250, 0.0980], ':');
-legend({'Top-10 initial','Ours','Top-1 initial'})
+legend({'Top-10 uniform landmarks, no matching','Our landmarks, our matching','Our landmarks, no matching','Top-1 uniform landmarks, no matching'},'Location','Southeast')
 title('Accuracy vs. distance')
 xlabel('Distance [m]')
 ylabel('Accuracy [%]')
