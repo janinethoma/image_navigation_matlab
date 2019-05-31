@@ -113,7 +113,7 @@ F = f_dists_query_ref;
 D = pdist2(query.xy', ref.xy');
 
 % Match with flow
-flow_matches = match_with_flow(query.xy,ref.xy(:,flow_lm),F(:,flow_lm));
+flow_matches = match_with_flow(query.xy,ref.xy(:,flow_lm),F(:,flow_lm),0);
 
 % Retrieve without matching
 [~, feature_matches] = sort(F(:,uniform_lm),2);

@@ -1,6 +1,8 @@
-function [matchFinalIdx] = match_with_flow(query_xy, ref_xy, visualDist)
+function [matchFinalIdx] = match_with_flow(query_xy, ref_xy, visualDist, topN)
 %MATCH_WITH_FLOW(query_xy, ref_xy,  visual_Dist)
 % 2xn query_xy 2xm ref_xy nxm visual_Dist
+% topN: 0 to generate e_il between all v'/p combinations, n to only 
+% generate edges between v'/p and their top-n visually closest p/v' 
 
 distBoundInit = 30;
 
@@ -43,12 +45,38 @@ nodeIdx = nodeIdx + 1;
 
 %% form V' to P
 oneDirStart = length(arc_i) + 1;
-for i = 1:numV
-    for j = 1:numP
-        arc_i = [arc_i, nodeIdx + i];
-        arc_j = [arc_j, nodeIdx + numV + j];
-        arc_base = [arc_base, huberLoss(visualDist(j, i), costThresh)]; %huber cost
-        arc_cap = [arc_cap, numP];
+% When matching long sequences, it may be computationally beneficial to only generate
+% edged between v'/p and their top-n visually closest p/v' instead of all v'-p combinations
+% as described in our paper.
+if topN == 0 % Generate all p-v' edges
+    disp('Generating all v-p edges.')
+    for i = 1:numV
+        for j = 1:numP
+            arc_i = [arc_i, nodeIdx + i];
+            arc_j = [arc_j, nodeIdx + numV + j];
+            arc_base = [arc_base, huberLoss(visualDist(j, i), costThresh)]; %huber cost
+            arc_cap = [arc_cap, numP];
+        end
+    end
+else % Generate fewer edges
+    disp('Generating limited v-p edges.')
+    matchLenght = min([numP, numV, topN]);
+    [dist2NthclosestP, idxOfNthClosestP] = sort(visualDist, 1); % Get closest references for each query
+    for i = 1:numV
+        for j = 1:min(matchLenght, numP)
+            arc_i = [arc_i, nodeIdx + i];
+            arc_j = [arc_j, nodeIdx + numV + idxOfNthClosestP(j, i)];
+            arc_base = [arc_base, huberLoss(dist2NthclosestP(j, i), costThresh)]; %huber cost
+            arc_cap = [arc_cap, numP];
+        end
+    end
+    for i = 1:numP
+        for j = 1:min(matchLenght, numV)
+            arc_i = [arc_i, nodeIdx + idxOfNthClosestV(i, j)];
+            arc_j = [arc_j, nodeIdx + numV + i];
+            arc_base = [arc_base, huberLoss(dist2NthclosestV(i, j), costThresh)]; %huber cost
+            arc_cap = [arc_cap, numP];
+        end
     end
 end
 oneDirEnd = length(arc_i);
