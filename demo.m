@@ -12,12 +12,11 @@
 %% CHANGE THIS TO MATCH YOUR MOSEK INSTALLATION
 dpath = javaclasspath;
 if isempty(dpath)
-    path = '/path/to/your/mosek/installation'; 
+    path = '/scratch/jthoma/apps'; % Change to '/path/to/your/mosek/installation'
     system(['export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:', path, '/mosek/8/tools/platform/linux64x86/bin/libmosek64.so.8.0']);
     addpath([path, '/mosek/8/toolbox/r2014a/']);
     javaaddpath([path, '/mosek/8/tools/platform/linux64x86/bin/mosekmatlab.jar']);
 end
-
 
 addpath('helper')
 
@@ -87,7 +86,6 @@ num_landmarks = 150;
 feat_dists = f_dists_ref_ref(sub2ind(size(f_dists_ref_ref),...
     edges(1,:),edges(2,:)));
 
-
 flow_lm = sample_with_flow(ref.xy, edges, source_idx, sink_idx, ...
     geo_dists, feat_dists, num_landmarks);
 
@@ -115,7 +113,6 @@ F = f_dists_query_ref;
 D = pdist2(query.xy', ref.xy');
 
 % Match with flow
-
 flow_matches = match_with_flow(query.xy,ref.xy(:,flow_lm),F(:,flow_lm));
 
 % Retrieve without matching

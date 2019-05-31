@@ -2,7 +2,7 @@ function [matchFinalIdx] = match_with_flow(query_xy, ref_xy, visualDist)
 %MATCH_WITH_FLOW(query_xy, ref_xy,  visual_Dist)
 % 2xn query_xy 2xm ref_xy nxm visual_Dist
 
-distBoundInit = 30; 
+distBoundInit = 30;
 
 % Normalize locations
 t = mean(ref_xy, 2);
@@ -15,8 +15,8 @@ ref_xy = normMat * (ref_xy - t);
 
 visualDist = visualDist / median(min(visualDist));
 
-[distValu1, idx_init1] = sort(visualDist, 2); % visual distance
-[distValu2, idx_init2] = sort(visualDist, 1); % visual distance
+[dist2NthclosestV, idxOfNthClosestV] = sort(visualDist, 2); % Get closest references for each query
+
 
 %% Initialization
 Vxy = ref_xy;
@@ -24,7 +24,7 @@ numP = size(query_xy, 2);
 numV = size(Vxy, 2);
 T = numP;
 matchLenght = min([numP, numV]);
-costThresh = median(distValu1(:, 1));
+costThresh = median(dist2NthclosestV(:, 1));
 
 nodeIdx = 0;
 arc_cap = [];
@@ -44,18 +44,10 @@ nodeIdx = nodeIdx + 1;
 %% form V' to P
 oneDirStart = length(arc_i) + 1;
 for i = 1:numV
-    for j = 1:min(matchLenght, numP)
+    for j = 1:numP
         arc_i = [arc_i, nodeIdx + i];
-        arc_j = [arc_j, nodeIdx + numV + idx_init2(j, i)];
-        arc_base = [arc_base, huberLoss(distValu2(j, i), costThresh)]; %huber cost
-        arc_cap = [arc_cap, numP];
-    end
-end
-for i = 1:numP
-    for j = 1:min(matchLenght, numV)
-        arc_i = [arc_i, nodeIdx + idx_init1(i, j)];
-        arc_j = [arc_j, nodeIdx + numV + i];
-        arc_base = [arc_base, huberLoss(distValu1(i, j), costThresh)]; %huber cost
+        arc_j = [arc_j, nodeIdx + numV + j];
+        arc_base = [arc_base, huberLoss(visualDist(j, i), costThresh)]; %huber cost
         arc_cap = [arc_cap, numP];
     end
 end
@@ -71,7 +63,7 @@ for i = 1:numP
 end
 
 %% Mosek optimization
-mV = idx_init1(:, 1:matchLenght);
+mV = idxOfNthClosestV(:, 1:matchLenght);
 numAllV = 1 + numV + numP + 1; % 1 source, 1 sink, numV, numP
 
 narcs = size(arc_j, 2);
@@ -116,7 +108,7 @@ for i = numV + 2:numV + numP + 1
     if isempty(selected1) || isempty(selected2)
         continue;
     end
-    flowIdx1 = selected1 + numV;
+    flowIdx1 = selected1 + numV; % + numV because find was called only on V' to P edges
     flowIdx2 = selected2 + numV;
     
     vertexIdx1 = arc_i(selected1+numV) - 1;
@@ -158,4 +150,5 @@ for i = numV + 2:numV + numP + 1
 end
 
 end
+
 
