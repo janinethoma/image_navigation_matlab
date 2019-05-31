@@ -46,8 +46,8 @@ nodeIdx = nodeIdx + 1;
 %% form V' to P
 oneDirStart = length(arc_i) + 1;
 % When matching long sequences, it may be computationally beneficial to only generate
-% edged between v'/p and their top-n visually closest p/v' instead of all v'-p combinations
-% as described in our paper.
+% edges between v'/p and their top-n visually closest p/v' instead of all
+% v'-p combinations.
 if topN == 0 % Generate all p-v' edges
     disp('Generating all v-p edges.')
     for i = 1:numV

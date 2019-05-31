@@ -1,10 +1,10 @@
  Matlab demo for our CVPR'2019 paper
-# Mapping, Localization and Path Planning for Image-based Navigation using Visual Features and Map
+# [Mapping, Localization and Path Planning for Image-based Navigation using Visual Features and Map](https://arxiv.org/pdf/1812.03795.pdf)
 
 This code was tested in MATLAB R2017b and with [mosek 8.1.0.64](https://www.mosek.com/downloads/).
 
 Please, run the code in 'demo.m' to view our demo.
-You may need to adjust the path to your mosek directory inside 'demo.m'.
+You have to adjust the path to your mosek directory inside 'demo.m'.
 
 This demo does the following using the concepts introduced in our paper:
 1) Find landmarks in a subsequence of the Oxford Robotcar run from  2015-10-29 12:18:17
