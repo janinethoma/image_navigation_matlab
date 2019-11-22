@@ -7,12 +7,14 @@ function [matchFinalIdx] = match_with_flow(query_xy, ref_xy, visualDist, topN)
 distBoundInit = 30;
 
 % Normalize locations
-t = mean(ref_xy, 2);
+t_ = mean(ref_xy, 2);
+t = repmat(t_, 1, size(ref_xy, 2));
 s = mean(sqrt(sum((ref_xy - t).^2, 1)));
 distBoundNorm = distBoundInit / s;
 
 normMat = sqrt(2) * [1 / s, 0; 0, 1 / s];
-query_xy = normMat * (query_xy - t);
+tq = repmat(t_, 1, size(query_xy, 2));
+query_xy = normMat * (query_xy - tq);
 ref_xy = normMat * (ref_xy - t);
 
 visualDist = visualDist / median(min(visualDist));
@@ -172,7 +174,8 @@ for i = numV + 2:numV + numP + 1
     v1All = Vxy(:, vertexIdx1);
     x1All = flow(flowIdx1);
     
-    Y = sum(repmat(x1All', 2, 1).*v1All, 2); % XL for error computation
+    Y_ = sum(repmat(x1All', 2, 1).*v1All, 2); % XL for error computation
+    Y = repmat(Y_, 1, size(ref_xy, 2));
     [~, idMin] = min(sum((ref_xy - Y).^2, 1)); % idMin matched landmark
     matchFinalIdx(i-numV-1) = idMin;
 end
