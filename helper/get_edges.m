@@ -59,7 +59,7 @@ l = integrate_path(xy);
 %     A       |
 %     |       B
 % -----       -------
-%as illustrated, edge(A,B) will cut the corner
+%as illustrated, edge(A,B) cut the corner if one point is not within the threshold distance of the other point 
 to_delete = ((l(edges(2,:))-l(edges(1,:)))-dists)>diff_to_path;
 disp(['Deleting ' num2str(sum(to_delete)) ' edges, as they cut corners.'])
 edges(:,to_delete) = [];
